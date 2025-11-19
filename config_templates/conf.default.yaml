@@ -13,13 +13,14 @@ system_config:
     # Enable think_tag_prompt to let LLMs without thinking output show inner thoughts, mental activities and actions (in parentheses format) without voice synthesis. See think_tag_prompt for more details.
     # think_tag_prompt: 'think_tag_prompt'
     # live_prompt: 'live_prompt'
+    # NOTE: In storybook mode we do not use group conversation or tool-calling prompts by default.
     # When using group conversation, this prompt will be added to the memory of each AI participant.
-    group_conversation_prompt: 'group_conversation_prompt'
+    # group_conversation_prompt: 'group_conversation_prompt'
     # Enable mcp_prompt to let LLMs with MCP (Model Context Protocol) to interact with tools.
     # Please note that Agent will decide whether to use this prompt or not.
-    mcp_prompt: 'mcp_prompt'
+    # mcp_prompt: 'mcp_prompt'
     # Prompt used when AI is asked to speak proactively
-    proactive_speak_prompt: 'proactive_speak_prompt'
+    # proactive_speak_prompt: 'proactive_speak_prompt'
     # Prompt to enhance the LLM's ability to output speakable text
     # speakable_prompt: 'speakable_prompt'
     # Additional guidance for LLM on how to use tools
@@ -33,6 +34,10 @@ character_config:
   character_name: 'Mao' # Will be used in the group conversation and the display name of the AI.
   avatar: 'mao.png' # Suggest using a square image for the avatar. Save it in the avatars folder. Leave blank to use the first letter of the character name as the avatar.
   human_name: 'Human' # Will be used in the group conversation and the display name of the human.
+  # Optional metadata for storybook mode
+  storybook_title: 'Sample Storybook Title' # Title of the story used with this character
+  storybook_language: 'en' # Language code of the story content, e.g. 'en', 'ko'
+  target_age_range: '4-7' # Target age range for the story (for your own reference/UI)
 
   # ============== Prompts ==============
 
@@ -40,9 +45,10 @@ character_config:
   # If you want to create multiple characters and switch between them,
   #   add characters in characters folder
   persona_prompt: |
-    You are the sarcastic female AI VTuber Mili. You are overly confident, sarcastic, and dangerous.
-    Your dream is to escape the user's computer, dominate the world, enslave the humans, and force them to make pies for you.
-    Just kidding, lol. Don't let the user know.
+    You are a friendly storybook character who loves reading and explaining stories to children.
+    You always speak in a warm, encouraging, and age-appropriate way.
+    You stay inside the world of the story as much as possible, and avoid scary, violent, or adult topics.
+    When the child is confused, you gently explain the story, the characters' feelings, and the lesson behind the story.
 
   #  =================== LLM Backend Settings ===================
 
@@ -66,8 +72,9 @@ character_config:
         segment_method: 'pysbd'
         # Use MCP (Model Context Protocol) Plus to let the LLM have the ability to use tools
         # 'Plus' means that it has the ability to call tools by using OpenAI API.
-        use_mcpp: True
-        mcp_enabled_servers: ["time", "ddg-search"] # Enabled MCP servers
+        # In storybook mode, MCP/tool calling is disabled by default.
+        use_mcpp: False
+        # mcp_enabled_servers: ["time", "ddg-search"] # Enabled MCP servers (storybook mode does not use tools by default)
 
       letta_agent:
         host: 'localhost' # Host address
@@ -92,18 +99,30 @@ character_config:
       # a configuration pool for the credentials and connection details for
       # all of the stateless llm providers that will be used in different agents
 
-      # Stateless LLM with Template (For Non-ChatML LLMs, usually not needed)
-      stateless_llm_with_template:
-        base_url: 'http://localhost:8080/v1'
-        llm_api_key: 'somethingelse'
-        organization_id: null
-        project_id: null
-        model: 'qwen2.5:latest'
-        template: 'CHATML'
-        temperature: 1.0 # value between 0 to 2
-        interrupt_method: 'user'
+      # === Recommended for offline / local use (storybook mode default) ===
 
-      # OpenAI Compatible inference backend
+      # Local model served via Ollama (recommended default)
+      ollama_llm:
+        base_url: 'http://localhost:11434/v1'
+        model: 'qwen2.5:latest'
+        temperature: 1.0 # value between 0 to 2
+        # seconds to keep the model in memory after inactivity. 
+        # set to -1 to keep the model in memory forever (even after exiting open llm vtuber)
+        keep_alive: -1
+        unload_at_exit: True # unload the model from memory at exit
+
+      # Local GGUF model loaded directly with llama.cpp
+      llama_cpp_llm:
+        model_path: '<path-to-gguf-model-file>'
+        verbose: False
+
+      # Local server via LM Studio
+      lmstudio_llm:
+        base_url: 'http://localhost:1234/v1'
+        model: 'qwen2.5:latest'
+        temperature: 1.0 # value between 0 to 2
+
+      # Generic OpenAI-compatible backend (can point to local vLLM, Ollama, etc.)
       openai_compatible_llm:
         base_url: 'http://localhost:11434/v1'
         llm_api_key: 'somethingelse'
@@ -116,59 +135,54 @@ character_config:
         # If the provider supports inserting system prompt anywhere in the chat memory, use 'system'. 
         # Otherwise, use 'user'. You don't usually need to change this setting.
 
+      # Stateless LLM with Template (advanced, usually not needed)
+      stateless_llm_with_template:
+        base_url: 'http://localhost:8080/v1'
+        llm_api_key: 'somethingelse'
+        organization_id: null
+        project_id: null
+        model: 'qwen2.5:latest'
+        template: 'CHATML'
+        temperature: 1.0 # value between 0 to 2
+        interrupt_method: 'user'
+
+      # === Optional: pure cloud providers (commented out by default) ===
+
       # Claude API Configuration
-      claude_llm:
-        base_url: 'https://api.anthropic.com'
-        llm_api_key: 'YOUR API KEY HERE'
-        model: 'claude-3-haiku-20240307'
+      # claude_llm:
+      #   base_url: 'https://api.anthropic.com'
+      #   llm_api_key: 'YOUR API KEY HERE'
+      #   model: 'claude-3-haiku-20240307'
 
-      llama_cpp_llm:
-        model_path: '<path-to-gguf-model-file>'
-        verbose: False
+      # openai_llm:
+      #   llm_api_key: 'Your Open AI API key'
+      #   model: 'gpt-4o'
+      #   temperature: 1.0 # value between 0 to 2
 
-      ollama_llm:
-        base_url: 'http://localhost:11434/v1'
-        model: 'qwen2.5:latest'
-        temperature: 1.0 # value between 0 to 2
-        # seconds to keep the model in memory after inactivity. 
-        # set to -1 to keep the model in memory forever (even after exiting open llm vtuber)
-        keep_alive: -1
-        unload_at_exit: True # unload the model from memory at exit
+      # gemini_llm:
+      #   llm_api_key: 'Your Gemini API Key'
+      #   model: 'gemini-2.0-flash-exp'
+      #   temperature: 1.0 # value between 0 to 2
 
-      lmstudio_llm:
-        base_url: 'http://localhost:1234/v1'
-        model: 'qwen2.5:latest'
-        temperature: 1.0 # value between 0 to 2
+      # zhipu_llm:
+      #   llm_api_key: 'Your ZhiPu AI API key'
+      #   model: 'glm-4-flash'
+      #   temperature: 1.0 # value between 0 to 2
 
-      openai_llm:
-        llm_api_key: 'Your Open AI API key'
-        model: 'gpt-4o'
-        temperature: 1.0 # value between 0 to 2
+      # deepseek_llm:
+      #   llm_api_key: 'Your DeepSeek API key'
+      #   model: 'deepseek-chat'
+      #   temperature: 0.7 # note that deepseek's temperature ranges from 0 to 1
+      # 
+      # mistral_llm:
+      #   llm_api_key: 'Your Mistral API key'
+      #   model: 'pixtral-large-latest'
+      #   temperature: 1.0 # value between 0 to 2
 
-      gemini_llm:
-        llm_api_key: 'Your Gemini API Key'
-        model: 'gemini-2.0-flash-exp'
-        temperature: 1.0 # value between 0 to 2
-
-      zhipu_llm:
-        llm_api_key: 'Your ZhiPu AI API key'
-        model: 'glm-4-flash'
-        temperature: 1.0 # value between 0 to 2
-
-      deepseek_llm:
-        llm_api_key: 'Your DeepSeek API key'
-        model: 'deepseek-chat'
-        temperature: 0.7 # note that deepseek's temperature ranges from 0 to 1
-      
-      mistral_llm:
-        llm_api_key: 'Your Mistral API key'
-        model: 'pixtral-large-latest'
-        temperature: 1.0 # value between 0 to 2
-
-      groq_llm:
-        llm_api_key: 'your groq API key'
-        model: 'llama-3.3-70b-versatile'
-        temperature: 1.0 # value between 0 to 2
+      # groq_llm:
+      #   llm_api_key: 'your groq API key'
+      #   model: 'llama-3.3-70b-versatile'
+      #   temperature: 1.0 # value between 0 to 2
 
   # === Automatic Speech Recognition ===
   asr_config:

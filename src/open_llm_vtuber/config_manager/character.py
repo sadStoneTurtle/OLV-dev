@@ -19,6 +19,9 @@ class CharacterConfig(I18nMixin):
     character_name: str = Field(default="", alias="character_name")
     human_name: str = Field(default="Human", alias="human_name")
     avatar: str = Field(default="", alias="avatar")
+    storybook_title: str = Field(default="", alias="storybook_title")
+    storybook_language: str = Field(default="", alias="storybook_language")
+    target_age_range: str = Field(default="", alias="target_age_range")
     persona_prompt: str = Field(..., alias="persona_prompt")
     agent_config: AgentConfig = Field(..., alias="agent_config")
     asr_config: ASRConfig = Field(..., alias="asr_config")
@@ -41,6 +44,18 @@ class CharacterConfig(I18nMixin):
         ),
         "character_name": Description(
             en="Name of the AI character in conversation", zh="对话中AI角色的名字"
+        ),
+        "storybook_title": Description(
+            en="Title of the storybook associated with this character",
+            zh="与此角色对应的故事书标题",
+        ),
+        "storybook_language": Description(
+            en="Language code of the storybook content (e.g. 'en', 'ko', 'zh')",
+            zh="故事书内容的语言代码（例如 'en'、'ko'、'zh'）",
+        ),
+        "target_age_range": Description(
+            en="Target age range for this storybook (e.g. '4-7')",
+            zh="该故事书适合的年龄段（例如 '4-7'）",
         ),
         "persona_prompt": Description(
             en="Persona prompt. The persona of your character.", zh="角色人设提示词"

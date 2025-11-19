@@ -1,160 +1,100 @@
 ![](./assets/banner.jpg)
 
-<h1 align="center">Open-LLM-VTuber</h1>
+<h1 align="center">Open-Storybook-VTuber</h1>
 <h3 align="center">
-
-[![GitHub release](https://img.shields.io/github/v/release/t41372/Open-LLM-VTuber)](https://github.com/t41372/Open-LLM-VTuber/releases) 
-[![license](https://img.shields.io/github/license/t41372/Open-LLM-VTuber)](https://github.com/t41372/Open-LLM-VTuber/blob/master/LICENSE) 
-[![CodeQL](https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/actions/workflows/codeql.yml/badge.svg)](https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/actions/workflows/codeql.yml)
-[![Ruff](https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/actions/workflows/ruff.yml/badge.svg)](https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/actions/workflows/ruff.yml)
-[![Docker](https://img.shields.io/badge/t41372%2FOpen--LLM--VTuber-%25230db7ed.svg?logo=docker&logoColor=blue&labelColor=white&color=blue)](https://hub.docker.com/r/t41372/open-llm-vtuber) 
-[![QQ Group](https://img.shields.io/badge/QQ_Group-792615362-white?style=flat&logo=qq&logoColor=white)](https://qm.qq.com/q/ngvNUQpuKI)
-[![QQ Channel](https://img.shields.io/badge/QQ_Channel_(dev)-pd93364606-white?style=flat&logo=qq&logoColor=white)](https://pd.qq.com/s/tt54r3bu)
-
-
-[![BuyMeACoffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-ffdd00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://www.buymeacoffee.com/yi.ting)
-[![](https://dcbadge.limes.pink/api/server/3UDA8YFDXx)](https://discord.gg/3UDA8YFDXx)
-
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Open-LLM-VTuber/Open-LLM-VTuber)
-
-English README | [中文README](https://github.com/t41372/Open-LLM-VTuber/blob/main/README.CN.md)
-
-[Documentation](https://open-llm-vtuber.github.io/docs/quick-start) | [![Roadmap](https://img.shields.io/badge/Roadmap-GitHub_Project-yellow)](https://github.com/orgs/Open-LLM-VTuber/projects/2)
-
-<a href="https://trendshift.io/repositories/12358" target="_blank"><img src="https://trendshift.io/api/badge/repositories/12358" alt="t41372%2FOpen-LLM-VTuber | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
-
+An offline-ready, voice-interactive storybook companion that brings your favorite characters to life.
 </h3>
 
+[![license](https://img.shields.io/github/license/t41372/Open-LLM-VTuber)](https://github.com/t41372/Open-LLM-VTuber/blob/master/LICENSE)
+[![Discord](https://img.shields.io/badge/Discord-Join%20our%20storybook%20server-5865F2?logo=discord&logoColor=white)](https://discord.gg/storybook-vtuber)
 
-> 常见问题 Common Issues doc (Written in Chinese): https://docs.qq.com/pdf/DTFZGQXdTUXhIYWRq
->
-> User Survey: https://forms.gle/w6Y6PiHTZr1nzbtWA
->
-> 调查问卷(中文): https://wj.qq.com/s2/16150415/f50a/
+English README
 
-
-
-> :warning: This project is in its early stages and is currently under **active development**.
-
-> :warning: If you want to run the server remotely and access it on a different machine, such as running the server on your computer and access it on your phone, you will need to configure `https`, because the microphone on the front end will only launch in a secure context (a.k.a. https or localhost). See [MDN Web Doc](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia). Therefore, you should configure https with a reverse proxy to access the page on a remote machine (non-localhost).
-
+> ⚠️ This project is a fork of Open-LLM-VTuber, refocused on **interactive storybook characters** instead of general AI companions.
 
 
 ## ⭐️ What is this project?
 
+**Open-Storybook-VTuber**는 실시간 음성 기반으로 **동화책 속 캐릭터와 대화할 수 있는 애플리케이션**입니다.  
+일반적인 AI 비서와 대화하는 대신, 사용자는 **동화 속 해설자, 주인공, 혹은 안내자 역할을 하는 캐릭터와 직접 이야기**하게 됩니다.
 
-**Open-LLM-VTuber** is a unique **voice-interactive AI companion** that not only supports **real-time voice conversations**  and **visual perception** but also features a lively **Live2D avatar**. All functionalities can run completely offline on your computer!
+이 앱은 로컬 환경에서 실행되며, **Live2D 아바타**, **자동 음성 인식(ASR)**, **텍스트 음성 변환(TTS)** 를 이용해 캐릭터를 실제로 살아 있는 것처럼 느끼게 합니다.  
+사용자는 이야기를 함께 읽고, 줄거리에 대해 질문하고, 등장인물의 감정이나 교훈에 대해 물어보면서 **인터랙티브 스토리텔링**을 경험할 수 있습니다.
 
-You can treat it as your personal AI companion — whether you want a `virtual girlfriend`, `boyfriend`, `cute pet`, or any other character, it can meet your expectations. The project fully supports `Windows`, `macOS`, and `Linux`, and offers two usage modes: web version and desktop client (with special support for **transparent background desktop pet mode**, allowing the AI companion to accompany you anywhere on your screen).
-
-Although the long-term memory feature is temporarily removed (coming back soon), thanks to the persistent storage of chat logs, you can always continue your previous unfinished conversations without losing any precious interactive moments.
-
-In terms of backend support, we have integrated a rich variety of LLM inference, text-to-speech, and speech recognition solutions. If you want to customize your AI companion, you can refer to the [Character Customization Guide](https://open-llm-vtuber.github.io/docs/user-guide/live2d) to customize your AI companion's appearance and persona.
-
-The reason it's called `Open-LLM-Vtuber` instead of `Open-LLM-Companion` or `Open-LLM-Waifu` is because the project's initial development goal was to use open-source solutions that can run offline on platforms other than Windows to recreate the closed-source AI Vtuber `neuro-sama`.
-
-This project underwent code refactoring after version `v1.0.0` and is currently in active development, with many exciting features coming soon! 🚀 Check out our [Roadmap](https://github.com/users/t41372/projects/1/views/5) to learn about update plans.
-
-
-### 👀 Demo
-| ![](assets/i1.jpg) | ![](assets/i2.jpg) |
-|:---:|:---:|
-| ![](assets/i3.jpg) | ![](assets/i4.jpg) |
+**어린이와 부모가 함께 사용할 수 있는, 가족 친화적인 동화 중심 경험**에 초점을 맞추었습니다.
 
 
 ## ✨ Features & Highlights
 
-- 🖥️ **Cross-platform support**: Perfect compatibility with macOS, Linux, and Windows. We support NVIDIA and non-NVIDIA GPUs, with options to run on CPU or use cloud APIs for resource-intensive tasks. Some components support GPU acceleration on macOS.
+- 📚 **Story-focused interaction**  
+  일반적인 챗봇이 아니라 **동화책 속 캐릭터와 직접 대화**합니다.  
+  줄거리, 등장인물, 이야기의 교훈에 대해 자연스럽게 질문하고 답을 들을 수 있습니다.
 
-- 🔒 **Offline mode support**: Run completely offline using local models - no internet required. Your conversations stay on your device, ensuring privacy and security.
+- 🎤 **Real-time voice conversation**  
+  마이크로 말을 걸면, 낮은 지연 시간의 ASR/LLM/TTS 파이프라인을 통해 **거의 실시간에 가까운 음성 응답**을 받습니다.
 
-- 💻 **Attractive and powerful web and desktop clients**: Offers both web version and desktop client usage modes, supporting rich interactive features and personalization settings. The desktop client can switch freely between window mode and desktop pet mode, allowing the AI companion to be by your side at all times.
+- 🧸 **Live2D storybook avatar**  
+  Live2D 캐릭터가 표정과 동작으로 반응하여, 마치 동화 속 인물이 화면 밖으로 나온 것 같은 느낌을 줍니다.
 
-- 🎯 **Advanced interaction features**:
-  - 👁️ Visual perception, supporting camera, screen recording and screenshots, allowing your AI companion to see you and your screen
-  - 🎤 Voice interruption without headphones (AI won't hear its own voice)
-  - 🫱 Touch feedback, interact with your AI companion through clicks or drags
-  - 😊 Live2D expressions, set emotion mapping to control model expressions from the backend
-  - 🐱 Pet mode, supporting transparent background, global top-most, and mouse click-through - drag your AI companion anywhere on the screen
-  - 💭 Display AI's inner thoughts, allowing you to see AI's expressions, thoughts and actions without them being spoken
-  - 🗣️ AI proactive speaking feature
-  - 💾 Chat log persistence, switch to previous conversations anytime
-  - 🌍 TTS translation support (e.g., chat in Chinese while AI uses Japanese voice)
+- 🔒 **Offline-friendly by design**  
+  Ollama, llama.cpp 등 **로컬 LLM/ASR/TTS 백엔드**를 사용할 수 있도록 설계되어,  
+  인터넷 연결 없이도 동작하며, 대화 내용이 외부 서버로 전송되지 않도록 구성할 수 있습니다.
 
-- 🧠 **Extensive model support**:
-  - 🤖 Large Language Models (LLM): Ollama, OpenAI (and any OpenAI-compatible API), Gemini, Claude, Mistral, DeepSeek, Zhipu AI, GGUF, LM Studio, vLLM, etc.
-  - 🎙️ Automatic Speech Recognition (ASR): sherpa-onnx, FunASR, Faster-Whisper, Whisper.cpp, Whisper, Groq Whisper, Azure ASR, etc.
-  - 🔊 Text-to-Speech (TTS): sherpa-onnx, pyttsx3, MeloTTS, Coqui-TTS, GPTSoVITS, Bark, CosyVoice, Edge TTS, Fish Audio, Azure TTS, etc.
-
-- 🔧 **Highly customizable**:
-  - ⚙️ **Simple module configuration**: Switch various functional modules through simple configuration file modifications, without delving into the code
-  - 🎨 **Character customization**: Import custom Live2D models to give your AI companion a unique appearance. Shape your AI companion's persona by modifying the Prompt. Perform voice cloning to give your AI companion the voice you desire
-  - 🧩 **Flexible Agent implementation**: Inherit and implement the Agent interface to integrate any Agent architecture, such as HumeAI EVI, OpenAI Her, Mem0, etc.
-  - 🔌 **Good extensibility**: Modular design allows you to easily add your own LLM, ASR, TTS, and other module implementations, extending new features at any time
-
-
-## 👥 User Reviews
-> Thanks to the developer for open-sourcing and sharing the girlfriend for everyone to use
-> 
-> This girlfriend has been used over 100,000 times
+- 🛠️ **Configurable but focused**  
+  YAML 설정 파일을 통해 **동화 제목, 기본 캐릭터 페르소나, 언어 설정** 등을 쉽게 바꿀 수 있습니다.  
+  기본 설정은 “안전하고 동화 중심인 경험”에 맞춰져 있으며, 필요할 때만 고급 기능을 켜도록 설계하는 것을 목표로 합니다.
 
 
 ## 🚀 Quick Start
 
-Please refer to the [Quick Start](https://open-llm-vtuber.github.io/docs/quick-start) section in our documentation for installation.
+설치 및 실행 방법은 원 프로젝트(Open-LLM-VTuber)의 설치 방식과 거의 동일합니다.  
+아래는 대표적인 로컬 실행 예시입니다.
+
+1. Python 3.10+ 및 `uv` 환경을 준비합니다.  
+2. 프로젝트 디렉터리로 이동한 뒤 의존성을 설치합니다.  
+   - `uv sync`  
+3. 서버를 실행합니다.  
+   - `uv run python run_server.py`  
+4. 브라우저에서 서버가 띄워주는 URL(예: `http://localhost:12393`)에 접속하면,  
+   동화 캐릭터와 대화할 수 있는 웹 클라이언트를 사용할 수 있습니다.
+
+로컬 LLM/ASR/TTS 설정은 `conf.yaml` 및 `config_templates` 아래 템플릿 파일을 참고하여 조정할 수 있습니다.
 
 
+## 😢 Uninstall
 
-## ☝ Update
-> :warning: `v1.0.0` has breaking changes and requires re-deployment. You *may* still update via the method below, but the `conf.yaml` file is incompatible and most of the dependencies needs to be reinstalled with `uv`. For those who came from versions before `v1.0.0`, I recommend deploy this project again with the [latest deployment guide](https://open-llm-vtuber.github.io/docs/quick-start).
+대부분의 파일(파이썬 의존성, 모델 파일 등)은 이 프로젝트 폴더 내부에 저장됩니다.  
+프로젝트 디렉터리를 삭제하면 대부분의 관련 파일이 함께 삭제됩니다.
 
-Please use `uv run update.py` to update if you installed any versions later than `v1.0.0`.
+다만 ModelScope 또는 Hugging Face를 통해 내려받은 모델은 `MODELSCOPE_CACHE`, `HF_HOME` 등의 별도 캐시 디렉터리에 있을 수 있습니다.  
+용량을 완전히 정리하고 싶다면, 해당 캐시 디렉터리도 함께 확인해 주세요.
 
-## 😢 Uninstall  
-Most files, including Python dependencies and models, are stored in the project folder.
-
-However, models downloaded via ModelScope or Hugging Face may also be in `MODELSCOPE_CACHE` or `HF_HOME`. While we aim to keep them in the project's `models` directory, it's good to double-check.  
-
-Review the installation guide for any extra tools you no longer need, such as `uv`, `ffmpeg`, or `deeplx`.  
-
-## 🤗 Want to contribute?
-Checkout the [development guide](https://docs.llmvtuber.com/docs/development-guide/overview).
-
-
-# 🎉🎉🎉 Related Projects
-
-[ylxmf2005/LLM-Live2D-Desktop-Assitant](https://github.com/ylxmf2005/LLM-Live2D-Desktop-Assitant)
-- Your Live2D desktop assistant powered by LLM! Available for both Windows and MacOS, it senses your screen, retrieves clipboard content, and responds to voice commands with a unique voice. Featuring voice wake-up, singing capabilities, and full computer control for seamless interaction with your favorite character.
-
-
-
-
+또한 설치 과정에서 별도로 설치한 도구들(`uv`, `ffmpeg`, `deeplx` 등)이 더 이상 필요 없다면 각 도구의 가이드를 참고하여 제거할 수 있습니다.
 
 
 ## 📜 Third-Party Licenses
 
 ### Live2D Sample Models Notice
 
-This project includes Live2D sample models provided by Live2D Inc. These assets are licensed separately under the Live2D Free Material License Agreement and the Terms of Use for Live2D Cubism Sample Data. They are not covered by the MIT license of this project.
+이 프로젝트에는 Live2D Inc.에서 제공하는 Live2D 샘플 모델이 포함되어 있습니다.  
+이 에셋들은 이 리포지토리의 MIT 라이선스와는 별도로, **Live2D Free Material License Agreement** 및  
+**Live2D Cubism Sample Data 이용 약관**의 적용을 받습니다.
 
-This content uses sample data owned and copyrighted by Live2D Inc. The sample data are utilized in accordance with the terms and conditions set by Live2D Inc. (See [Live2D Free Material License Agreement](https://www.live2d.jp/en/terms/live2d-free-material-license-agreement/) and [Terms of Use](https://www.live2d.com/eula/live2d-sample-model-terms_en.html)).
+해당 샘플 데이터는 Live2D Inc.가 소유한 저작물이며, 위 약관에 따라 사용됩니다.  
+자세한 내용은 다음 링크를 참고하세요:
+- [Live2D Free Material License Agreement](https://www.live2d.jp/en/terms/live2d-free-material-license-agreement/)
+- [Terms of Use](https://www.live2d.com/eula/live2d-sample-model-terms_en.html)
 
-Note: For commercial use, especially by medium or large-scale enterprises, the use of these Live2D sample models may be subject to additional licensing requirements. If you plan to use this project commercially, please ensure that you have the appropriate permissions from Live2D Inc., or use versions of the project without these models.
+특히 **상업적 이용**, 또는 **중·대규모 기업**에서의 활용을 계획하고 있다면,  
+이 샘플 모델을 사용하는 데 추가 라이선스가 필요할 수 있습니다.  
+이 프로젝트를 상업적으로 사용하려면 Live2D Inc.로부터 적절한 권한을 받거나,  
+해당 샘플 모델이 제거된 별도 버전을 사용하는 것을 권장합니다.
 
 
 ## Contributors
-Thanks our contributors and maintainers for making this project possible.
+
+이 프로젝트와 원 프로젝트(Open-LLM-VTuber)를 함께 발전시켜 준 모든 기여자분들께 감사드립니다.
 
 <a href="https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=Open-LLM-VTuber/Open-LLM-VTuber" />
 </a>
-
-
-## Star History
-
-[![Star History Chart](https://api.star-history.com/svg?repos=t41372/open-llm-vtuber&type=Date)](https://star-history.com/#t41372/open-llm-vtuber&Date)
-
-
-
-
-

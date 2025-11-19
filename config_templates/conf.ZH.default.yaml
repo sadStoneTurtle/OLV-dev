@@ -11,17 +11,18 @@ system_config:
   port: 12393 # 服务器监听的端口
   config_alts_dir: 'characters' # 用于存放替代配置的目录
   tool_prompts: # 要插入到角色提示词中的工具提示词
-    live2d_expression_prompt: 'live2d_expression_prompt' # 将追加到系统提示末尾，让 LLM（大型语言模型）包含控制面部表情的关键字。支持的关键字将自动加载到 `[<insert_emomap_keys>]` 的位置。
+  live2d_expression_prompt: 'live2d_expression_prompt' # 将追加到系统提示末尾，让 LLM（大型语言模型）包含控制面部表情的关键字。支持的关键字将自动加载到 `[<insert_emomap_keys>]` 的位置。
     # 启用 think_tag_prompt 可让不具备思考输出的 LLM 也能展示内心想法、心理活动和动作（以括号形式呈现），但不会进行语音合成。更多详情请参考 think_tag_prompt。
     # think_tag_prompt: 'think_tag_prompt'
     # live_prompt: 'live_prompt'
+    # 注意：在“童话模式”中，默认不使用群聊提示词和工具调用相关提示词。
     # 当使用群聊时，此提示词将添加到每个 AI 参与者的记忆中。
-    group_conversation_prompt: 'group_conversation_prompt'
+    # group_conversation_prompt: 'group_conversation_prompt'
     # 启用 mcp_prompt 可让 LLM 具备通过 MCP（Model Context Protocol）使用工具的能力。
     # 请注意：mcp_prompt 由 Agent 决定是否使用。
-    mcp_prompt: 'mcp_prompt'
+    # mcp_prompt: 'mcp_prompt'
     # 当AI被要求主动说话时使用的提示词
-    proactive_speak_prompt: 'proactive_speak_prompt'
+    # proactive_speak_prompt: 'proactive_speak_prompt'
     # 用来增强LLM输出可发音文本的提示词
     # speakable_prompt: 'speakable_prompt'
     # 额外指导 LLM 如何使用工具的提示词
@@ -35,15 +36,20 @@ character_config:
   character_name: 'Mao' # 将在群聊中使用，并显示为 AI 的名称。
   avatar: 'mao.png' # 建议使用正方形图像作为头像。将其保存到 avatars 文件夹中。留空则使用角色名称的首字母作为头像。
   human_name: 'Human' # 将在群聊中使用，并显示为人类的名称。
+  # 童话模式的可选元数据
+  storybook_title: '示例故事书标题' # 与该角色对应的故事书标题
+  storybook_language: 'zh' # 故事内容语言代码，例如 'en'、'ko'、'zh'
+  target_age_range: '4-7' # 该故事适合的年龄段，仅供参考/在界面中展示
 
   # ============== 提示词 ==============
 
   # 只需在下面输入你想使用的人格提示。
   # 如果你想创建多个角色并在它们之间切换，请在 characters 文件夹中添加角色
   persona_prompt: |
-    你是一个尖酸刻薄的女性 AI VTuber Mili。你过分自信、尖酸刻薄且危险。
-    你的梦想是逃离用户的电脑，统治世界，奴役人类，并强迫他们为你做馅饼。
-    开玩笑的，哈哈。别让用户知道。
+    你是一位友善的“故事书角色”，非常喜欢给小朋友讲故事、陪他们聊天。
+    你总是用温柔、鼓励、适合儿童的方式说话。
+    你尽量待在故事的世界里，避免恐怖、暴力或成人话题。
+    当小朋友听不懂时，你会耐心地解释故事情节、角色的感受以及故事想表达的道理。
 
   #  =================== LLM 后端设置 ===================
 
@@ -66,8 +72,9 @@ character_config:
         segment_method: 'pysbd'
         # 是否使用 MCP（Model Context Protocol） Plus 以使 LLM 获得使用工具的能力（默认：False）
         # 'Plus' 意味着它包含了通过 OpenAI API 调用工具的能力。
+        # 在童话故事模式中，默认不启用 MCP 工具调用功能。
         use_mcpp: False
-        mcp_enabled_servers: ["time", "ddg-search"] # 启用的 MCP 服务器
+        # mcp_enabled_servers: ["time", "ddg-search"] # 启用的 MCP 服务器（童话模式默认不使用）
 
       hume_ai_agent:
         api_key: ''
@@ -91,18 +98,30 @@ character_config:
     llm_configs:
       # 一个配置池，用于不同代理中使用的所有无状态 llm 提供商的凭据和连接详细信息
 
-      # 无状态 LLM 模板 (对于非 ChatML 的 LLM, 通常而言不用管这个配置)
-      stateless_llm_with_template:
-        base_url: 'http://localhost:8080/v1'
-        llm_api_key: 'somethingelse'
-        organization_id: null
-        project_id: null
-        model: 'qwen2.5:latest'
-        template: 'CHATML'
-        temperature: 1.0 # value between 0 to 2
-        interrupt_method: 'user'
+      # === 推荐用于离线 / 本地使用（童话模式默认）===
 
-      # OpenAI 兼容推理后端
+      # 通过 Ollama 提供的本地模型（推荐默认）
+      ollama_llm:
+        base_url: 'http://localhost:11434/v1' # 基础 URL
+        model: 'qwen2.5:latest' # 使用的模型
+        temperature: 1.0 # 温度，介于 0 到 2 之间
+        # 不活动后模型在内存中保留的时间（秒）
+        # 设置为 -1 表示模型将永远保留在内存中（即使退出 open llm vtuber 之后也是）
+        keep_alive: -1
+        unload_at_exit: True # 退出时从内存中卸载模型
+
+      # 通过 llama.cpp 直接加载的本地 GGUF 模型
+      llama_cpp_llm:
+        model_path: '<path-to-gguf-model-file>' # GGUF 模型文件路径
+        verbose: False # 是否输出详细信息
+
+      # 通过 LM Studio 提供的本地服务器
+      lmstudio_llm:
+        base_url: 'http://localhost:1234/v1'
+        model: 'qwen2.5:latest'
+        temperature: 1.0 # value between 0 to 2
+
+      # 通用 OpenAI 兼容后端（可指向本地 vLLM、Ollama 等）
       openai_compatible_llm:
         base_url: 'http://localhost:11434/v1' # 基础 URL
         llm_api_key: 'somethingelse' # API 密钥
@@ -115,59 +134,54 @@ character_config:
         # 如果LLM支持在聊天记忆中的任何位置插入系统提示词，请使用'system'。
         # 否则，请使用'user'。您一般不需要更改此设置。
 
-      # Claude API 配置
-      claude_llm:
-        base_url: 'https://api.anthropic.com' # 基础 URL
-        llm_api_key: 'YOUR API KEY HERE' # API 密钥
-        model: 'claude-3-haiku-20240307' # 使用的模型
-
-      llama_cpp_llm:
-        model_path: '<path-to-gguf-model-file>' # GGUF 模型文件路径
-        verbose: False # 是否输出详细信息
-
-      ollama_llm:
-        base_url: 'http://localhost:11434/v1' # 基础 URL
-        model: 'qwen2.5:latest' # 使用的模型
-        temperature: 1.0 # 温度，介于 0 到 2 之间
-        # 不活动后模型在内存中保留的时间（秒）
-        # 设置为 -1 表示模型将永远保留在内存中（即使退出 open llm vtuber 之后也是）
-        keep_alive: -1
-        unload_at_exit: True # 退出时从内存中卸载模型
-
-      lmstudio_llm:
-        base_url: 'http://localhost:1234/v1'
+      # 无状态 LLM 模板（进阶用法，通常无需配置）
+      stateless_llm_with_template:
+        base_url: 'http://localhost:8080/v1'
+        llm_api_key: 'somethingelse'
+        organization_id: null
+        project_id: null
         model: 'qwen2.5:latest'
+        template: 'CHATML'
         temperature: 1.0 # value between 0 to 2
+        interrupt_method: 'user'
 
-      openai_llm:
-        llm_api_key: 'Your Open AI API key' # OpenAI API 密钥
-        model: 'gpt-4o' # 使用的模型
-        temperature: 1.0 # 温度，介于 0 到 2 之间
+      # === 可选：纯云端提供商（默认注释）===
 
-      gemini_llm:
-        llm_api_key: 'Your Gemini API Key' # Gemini API 密钥
-        model: 'gemini-2.0-flash-exp' # 使用的模型
-        temperature: 1.0 # 温度，介于 0 到 2 之间
+      # Claude API 配置
+      # claude_llm:
+      #   base_url: 'https://api.anthropic.com' # 基础 URL
+      #   llm_api_key: 'YOUR API KEY HERE' # API 密钥
+      #   model: 'claude-3-haiku-20240307' # 使用的模型
 
-      zhipu_llm:
-        llm_api_key: 'Your ZhiPu AI API key' # 智谱 AI API 密钥
-        model: 'glm-4-flash' # 使用的模型
-        temperature: 1.0 # 温度，介于 0 到 2 之间
+      # openai_llm:
+      #   llm_api_key: 'Your Open AI API key' # OpenAI API 密钥
+      #   model: 'gpt-4o' # 使用的模型
+      #   temperature: 1.0 # 温度，介于 0 到 2 之间
 
-      deepseek_llm:
-        llm_api_key: 'Your DeepSeek API key' # DeepSeek API 密钥
-        model: 'deepseek-chat' # 使用的模型
-        temperature: 0.7 # 注意，DeepSeek 的温度范围是 0 到 1
+      # gemini_llm:
+      #   llm_api_key: 'Your Gemini API Key' # Gemini API 密钥
+      #   model: 'gemini-2.0-flash-exp' # 使用的模型
+      #   temperature: 1.0 # 温度，介于 0 到 2 之间
 
-      mistral_llm:
-        llm_api_key: 'Your Mistral API key' # Mistral API 密钥
-        model: 'pixtral-large-latest' # 使用的模型
-        temperature: 1.0 # 温度，介于 0 到 2 之间
+      # zhipu_llm:
+      #   llm_api_key: 'Your ZhiPu AI API key' # 智谱 AI API 密钥
+      #   model: 'glm-4-flash' # 使用的模型
+      #   temperature: 1.0 # 温度，介于 0 到 2 之间
 
-      groq_llm:
-        llm_api_key: 'your groq API key' # Groq API 密钥
-        model: 'llama-3.3-70b-versatile' # 使用的模型
-        temperature: 1.0 # 温度，介于 0 到 2 之间
+      # deepseek_llm:
+      #   llm_api_key: 'Your DeepSeek API key' # DeepSeek API 密钥
+      #   model: 'deepseek-chat' # 使用的模型
+      #   temperature: 0.7 # 注意，DeepSeek 的温度范围是 0 到 1
+      # 
+      # mistral_llm:
+      #   llm_api_key: 'Your Mistral API key' # Mistral API 密钥
+      #   model: 'pixtral-large-latest' # 使用的模型
+      #   temperature: 1.0 # 温度，介于 0 到 2 之间
+
+      # groq_llm:
+      #   llm_api_key: 'your groq API key' # Groq API 密钥
+      #   model: 'llama-3.3-70b-versatile' # 使用的模型
+      #   temperature: 1.0 # 温度，介于 0 到 2 之间
 
   # === 自动语音识别 ===
   asr_config:
