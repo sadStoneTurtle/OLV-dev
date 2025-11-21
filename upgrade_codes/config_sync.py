@@ -21,15 +21,15 @@ from packaging import version
 
 class ConfigSynchronizer:
     def __init__(self, lang="en", logger=logging.getLogger(__name__)):
-        self.lang = lang
-        self.texts = TEXTS[lang]
-        self.default_path = ZH_DEFAULT_CONF if lang == "zh" else EN_DEFAULT_CONF
+        self.lang = "en"  # Always use English
+        self.texts = TEXTS["en"]
+        self.default_path = EN_DEFAULT_CONF
         self.yaml = YAML()
         self.yaml.preserve_quotes = True
         self.user_path = USER_CONF
         self.backup_path = BACKUP_CONF
-        self.texts_merge = TEXTS_MERGE.get(lang, TEXTS_MERGE["en"])
-        self.texts_compare = TEXTS_COMPARE.get(lang, TEXTS_COMPARE["en"])
+        self.texts_merge = TEXTS_MERGE["en"]
+        self.texts_compare = TEXTS_COMPARE["en"]
         self.logger = logger
         self.upgrade_utils = UpgradeUtility(self.logger, self.lang)
 

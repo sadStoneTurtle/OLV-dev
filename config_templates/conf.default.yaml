@@ -37,14 +37,13 @@ character_config:
   # Optional metadata for storybook mode
   storybook_title: 'Sample Storybook Title' # Title of the story used with this character
   storybook_language: 'en' # Language code of the story content, e.g. 'en', 'ko'
-  target_age_range: '4-7' # Target age range for the story (for your own reference/UI)
-
+  target_age_range: '4-7' # Target age range for the story
   # ============== Prompts ==============
 
   # Enter the persona prompt you want to use below.
   # If you want to create multiple characters and switch between them,
   #   add characters in characters folder
-  persona_prompt: |
+  persona_prompt:
     You are a friendly storybook character who loves reading and explaining stories to children.
     You always speak in a warm, encouraging, and age-appropriate way.
     You stay inside the world of the story as much as possible, and avoid scary, violent, or adult topics.
@@ -104,7 +103,7 @@ character_config:
       # Local model served via Ollama (recommended default)
       ollama_llm:
         base_url: 'http://localhost:11434/v1'
-        model: 'qwen2.5:latest'
+        model: 'llama3.1:8b'
         temperature: 1.0 # value between 0 to 2
         # seconds to keep the model in memory after inactivity. 
         # set to -1 to keep the model in memory forever (even after exiting open llm vtuber)
