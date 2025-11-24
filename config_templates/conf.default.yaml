@@ -456,6 +456,19 @@ character_config:
       required_misses: 24 # Number of consecutive misses required to consider silence
       smoothing_window: 5 # Smoothing window size for VAD
 
+  # =================== RAG (Retrieval-Augmented Generation) ===================
+  rag_config:
+    enabled: false # Enable RAG functionality
+    rag_type: 'simple' # Type of RAG engine: 'simple', 'chroma', 'faiss'
+    include_in_prompt: true # Include retrieved context in the prompt
+    max_context_docs: 3 # Maximum number of documents to include in context (null for all)
+    
+    simple:
+      model_name: 'sentence-transformers/all-MiniLM-L6-v2' # Embedding model name
+      device: 'cpu' # Device: 'cpu', 'cuda', or 'mps'
+      top_k: 3 # Number of documents to retrieve
+      min_score: 0.3 # Minimum similarity score threshold (0.0 to 1.0)
+
   tts_preprocessor_config:
     # settings regarding preprocessing for text that goes into TTS
 
