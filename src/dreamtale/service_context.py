@@ -11,6 +11,7 @@ from .tts.tts_interface import TTSInterface
 from .vad.vad_interface import VADInterface
 from .agent.agents.agent_interface import AgentInterface
 from .translate.translate_interface import TranslateInterface
+from .rag.rag_interface import RAGInterface
 
 from .mcpp.server_registry import ServerRegistry
 from .mcpp.tool_manager import ToolManager
@@ -23,6 +24,7 @@ from .tts.tts_factory import TTSFactory
 from .vad.vad_factory import VADFactory
 from .agent.agent_factory import AgentFactory
 from .translate.translate_factory import TranslateFactory
+from .rag.rag_factory import RAGFactory
 
 from .config_manager import (
     Config,
@@ -36,6 +38,7 @@ from .config_manager import (
     read_yaml,
     validate_config,
 )
+from .config_manager.rag import RAGConfig
 
 
 class ServiceContext:
@@ -54,6 +57,8 @@ class ServiceContext:
         # translate_engine can be none if translation is disabled
         self.vad_engine: VADInterface | None = None
         self.translate_engine: TranslateInterface | None = None
+        # rag_engine can be none if RAG is disabled
+        self.rag_engine: RAGInterface | None = None
 
         self.mcp_server_registery: ServerRegistry | None = None
         self.tool_adapter: ToolAdapter | None = None
@@ -86,6 +91,8 @@ class ServiceContext:
             f"    Agent Config: {json.dumps(self.character_config.agent_config.model_dump(), indent=6) if self.character_config.agent_config else 'None'}\n"
             f"  VAD Engine: {type(self.vad_engine).__name__ if self.vad_engine else 'Not Loaded'}\n"
             f"    Agent Config: {json.dumps(self.character_config.vad_config.model_dump(), indent=6) if self.character_config.vad_config else 'None'}\n"
+            f"  RAG Engine: {type(self.rag_engine).__name__ if self.rag_engine else 'Not Loaded'}\n"
+            f"    RAG Config: {json.dumps(self.character_config.rag_config.model_dump(), indent=6) if self.character_config.rag_config else 'None'}\n"
             f"  System Prompt: {self.system_prompt or 'Not Set'}\n"
             f"  MCP Enabled: {'Yes' if self.mcp_client else 'No'}"
         )
@@ -277,6 +284,9 @@ class ServiceContext:
         # init vad from character config
         self.init_vad(config.character_config.vad_config)
 
+        # init rag from character config
+        await self.init_rag(config.character_config.rag_config)
+
         # Initialize shared ToolAdapter if it doesn't exist yet
         if (
             not self.tool_adapter
@@ -430,6 +440,32 @@ class ServiceContext:
             )
         else:
             logger.info("Translation already initialized with the same config.")
+
+    async def init_rag(self, rag_config: RAGConfig) -> None:
+        """Initialize or update the RAG engine based on the configuration."""
+
+        if not rag_config.enabled:
+            logger.debug("RAG is disabled.")
+            self.rag_engine = None
+            return
+
+        if not self.rag_engine or self.character_config.rag_config != rag_config:
+            logger.info(f"Initializing RAG: {rag_config.rag_type}")
+            try:
+                self.rag_engine = RAGFactory.get_rag_engine(
+                    rag_config.rag_type,
+                    **getattr(rag_config, rag_config.rag_type).model_dump(),
+                )
+                self.character_config.rag_config = rag_config
+                logger.info(
+                    f"✅ RAG engine initialized: {type(self.rag_engine).__name__}"
+                )
+            except Exception as e:
+                logger.error(f"Failed to initialize RAG engine: {e}")
+                self.rag_engine = None
+                raise
+        else:
+            logger.info("RAG already initialized with the same config.")
 
     # ==== utils
 

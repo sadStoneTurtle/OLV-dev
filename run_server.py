@@ -10,8 +10,8 @@ import uvicorn
 from loguru import logger
 from upgrade_codes.upgrade_manager import UpgradeManager
 
-from src.open_llm_vtuber.server import WebSocketServer
-from src.open_llm_vtuber.config_manager import Config, read_yaml, validate_config
+from src.dreamtale.server import WebSocketServer
+from src.dreamtale.config_manager import Config, read_yaml, validate_config
 
 os.environ["HF_HOME"] = str(Path(__file__).parent / "models")
 os.environ["MODELSCOPE_CACHE"] = str(Path(__file__).parent / "models")
@@ -98,12 +98,8 @@ def parse_args():
 def run(console_log_level: str):
     init_logger(console_log_level)
     logger.info(f"DreamTale, version v{get_version()}")
-
-    # Get selected language
-    lang = upgrade_manager.lang
-
-    # Check if the frontend submodule is initialized
-    check_frontend_submodule(lang)
+    lang = upgrade_manager.lang  # kor, en
+    check_frontend_submodule(lang)  # Check if the frontend submodule is initialized
 
     # Sync user config with default config
     try:

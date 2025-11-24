@@ -43,6 +43,7 @@ from .vad import (
     SileroVADConfig,
 )
 from .tts_preprocessor import TTSPreprocessorConfig, TranslatorConfig, DeepLXConfig
+from .rag import RAGConfig, SimpleRAGConfig
 from .i18n import I18nMixin, Description, MultiLingualString
 from .agent import (
     AgentConfig,
@@ -112,6 +113,9 @@ __all__ = [
     "TTSPreprocessorConfig",
     "TranslatorConfig",
     "DeepLXConfig",
+    # RAG related classes
+    "RAGConfig",
+    "SimpleRAGConfig",
     # i18n related classes
     "I18nMixin",
     "Description",

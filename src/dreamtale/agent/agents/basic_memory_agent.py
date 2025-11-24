@@ -244,6 +244,15 @@ class BasicMemoryAgent(AgentInterface):
         messages = self._memory.copy()
         user_content = []
         text_prompt = self._to_text_prompt(input_data)
+        
+        # Add RAG context to the prompt if available
+        if input_data.rag_context and input_data.rag_context.documents:
+            rag_formatted = input_data.rag_context.to_formatted_string()
+            if rag_formatted:
+                # Prepend RAG context to the user prompt
+                text_prompt = f"{rag_formatted}\n\nUser Question: {text_prompt}"
+                logger.debug(f"Added RAG context with {len(input_data.rag_context.documents)} documents to prompt")
+        
         if text_prompt:
             user_content.append({"type": "text", "text": text_prompt})
 

@@ -2,7 +2,7 @@ from .deeplx import DeepLXTranslate
 from .tencent import TencentTranslate
 from .translate_interface import TranslateInterface
 
-
+# TODO: add translate for korean
 class TranslateFactory:
     @staticmethod
     def get_translator(

@@ -1,6 +1,9 @@
 from dataclasses import dataclass
 from enum import Enum
-from typing import List, Optional, Dict, Any
+from typing import List, Optional, Dict, Any, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ..rag.rag_interface import RAGContext
 
 
 class ImageSource(Enum):
@@ -86,9 +89,11 @@ class BatchInput(BaseInput):
             - 'proactive_speak': Boolean flag indicating if this is a proactive speak input
             - 'skip_memory': Boolean flag indicating if this input should be skipped in AI's internal memory
             - 'skip_history': Boolean flag indicating if this input should be skipped in local history storage
+        rag_context: Optional RAG context containing retrieved documents
     """
 
     texts: List[TextData]
     images: Optional[List[ImageData]] = None
     files: Optional[List[FileData]] = None
     metadata: Optional[Dict[str, Any]] = None
+    rag_context: Optional["RAGContext"] = None

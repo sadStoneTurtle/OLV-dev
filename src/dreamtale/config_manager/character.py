@@ -6,6 +6,7 @@ from .asr import ASRConfig
 from .tts import TTSConfig
 from .vad import VADConfig
 from .tts_preprocessor import TTSPreprocessorConfig
+from .rag import RAGConfig
 
 from .agent import AgentConfig
 
@@ -29,6 +30,9 @@ class CharacterConfig(I18nMixin):
     vad_config: VADConfig = Field(..., alias="vad_config")
     tts_preprocessor_config: TTSPreprocessorConfig = Field(
         ..., alias="tts_preprocessor_config"
+    )
+    rag_config: RAGConfig = Field(
+        default_factory=RAGConfig, alias="rag_config"
     )
 
     DESCRIPTIONS: ClassVar[Dict[str, Description]] = {
@@ -70,6 +74,9 @@ class CharacterConfig(I18nMixin):
         ),
         "tts_preprocessor_config": Description(
             en="Configuration for Text-to-Speech Preprocessor",
+        ),
+        "rag_config": Description(
+            en="Configuration for RAG (Retrieval-Augmented Generation)",
         ),
         "human_name": Description(
             en="Name of the human user in conversation"

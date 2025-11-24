@@ -59,13 +59,58 @@ async def process_single_conversation(
             user_input, context.asr_engine, websocket_send
         )
 
-        # Create batch input
+        # Perform RAG retrieval if enabled
+        rag_context = None
+        if context.rag_engine and context.character_config.rag_config.enabled:
+            try:
+                logger.info(f"🔍 Performing RAG retrieval for query: '{input_text[:50]}...'")
+                rag_config = context.character_config.rag_config
+                
+                # Get retrieval parameters
+                top_k = getattr(rag_config, rag_config.rag_type).top_k
+                min_score = getattr(rag_config, rag_config.rag_type).min_score
+                
+                # Retrieve relevant documents
+                documents = await context.rag_engine.retrieve(
+                    query=input_text,
+                    top_k=top_k,
+                    min_score=min_score,
+                )
+                
+                if documents:
+                    from ..rag.rag_interface import RAGContext
+                    rag_context = RAGContext(
+                        documents=documents,
+                        query=input_text,
+                        metadata={"retrieval_time": "now"}  # Can add timestamp if needed
+                    )
+                    logger.info(f"✅ Retrieved {len(documents)} relevant documents")
+                    
+                    # Send RAG status to frontend
+                    await websocket_send(
+                        json.dumps({
+                            "type": "rag-retrieval-complete",
+                            "num_documents": len(documents),
+                            "top_score": documents[0].score if documents else 0.0,
+                        })
+                    )
+                else:
+                    logger.debug("No relevant documents found in RAG retrieval")
+            except Exception as e:
+                logger.error(f"Error during RAG retrieval: {e}")
+                # Continue without RAG context if retrieval fails
+
+        # Create batch input with RAG context
         batch_input = create_batch_input(
             input_text=input_text,
             images=images,
             from_name=context.character_config.human_name,
             metadata=metadata,
         )
+        
+        # Add RAG context to batch input
+        if rag_context:
+            batch_input.rag_context = rag_context
 
         # Store user message (check if we should skip storing to history)
         skip_history = metadata and metadata.get("skip_history", False)
