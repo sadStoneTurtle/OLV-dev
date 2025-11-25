@@ -7,10 +7,6 @@ from .stateless_llm_factory import LLMFactory as StatelessLLMFactory
 from .agents.hume_ai import HumeAIAgent
 from .agents.letta_agent import LettaAgent
 
-from ..mcpp.tool_manager import ToolManager
-from ..mcpp.tool_executor import ToolExecutor
-from typing import Optional
-
 
 class AgentFactory:
     @staticmethod
@@ -62,11 +58,6 @@ class AgentFactory:
 
             tool_prompts = kwargs.get("system_config", {}).get("tool_prompts", {})
 
-            # Extract MCP components/data needed by BasicMemoryAgent from kwargs
-            tool_manager: Optional[ToolManager] = kwargs.get("tool_manager")
-            tool_executor: Optional[ToolExecutor] = kwargs.get("tool_executor")
-            mcp_prompt_string: str = kwargs.get("mcp_prompt_string", "")
-
             # Create the agent with the LLM and live2d_model
             return BasicMemoryAgent(
                 llm=llm,
@@ -77,12 +68,8 @@ class AgentFactory:
                     "faster_first_response", True
                 ),
                 segment_method=basic_memory_settings.get("segment_method", "pysbd"),
-                use_mcpp=basic_memory_settings.get("use_mcpp", False),
                 interrupt_method=interrupt_method,
                 tool_prompts=tool_prompts,
-                tool_manager=tool_manager,
-                tool_executor=tool_executor,
-                mcp_prompt_string=mcp_prompt_string,
             )
 
         elif conversation_agent_choice == "mem0_agent":

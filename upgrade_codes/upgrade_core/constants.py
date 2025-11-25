@@ -1,13 +1,11 @@
 # upgrade/constants.py
 # CURRENT_SCRIPT_VERSION = "0.2.0"
 from ruamel.yaml import YAML
-from src.open_llm_vtuber.config_manager.utils import load_text_file_with_guess_encoding
+from src.dreamtale.config_manager.utils import load_text_file_with_guess_encoding
 import os
 
 USER_CONF = "conf.yaml"
 BACKUP_CONF = "conf.yaml.backup"
-
-ZH_DEFAULT_CONF = "config_templates/conf.ZH.default.yaml"
 EN_DEFAULT_CONF = "config_templates/conf.default.yaml"
 
 yaml = YAML()

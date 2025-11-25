@@ -18,7 +18,6 @@ from openai.types.chat.chat_completion_chunk import ChoiceDeltaToolCall
 from loguru import logger
 
 from .stateless_llm_interface import StatelessLLMInterface
-from ...mcpp.types import ToolCallObject
 
 
 class AsyncLLM(StatelessLLMInterface):
