@@ -7,12 +7,12 @@ from loguru import logger
 from .rag_interface import RAGInterface, RAGDocument
 
 
-class NaiveRAG(RAGInterface):
+class FaissRAG(RAGInterface):
     """
-    Simple in-memory RAG implementation using cosine similarity.
+    Faiss RAG implementation using cosine similarity.
     
-    This implementation uses sentence-transformers for embeddings and
-    stores everything in memory. Suitable for small to medium datasets.
+    This implementation uses Faiss for similarity search and
+    stores everything in memory. Suitable for large datasets.
     """
 
     def __init__(

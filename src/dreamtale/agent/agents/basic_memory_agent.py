@@ -59,7 +59,7 @@ class BasicMemoryAgent(AgentInterface):
     def _set_llm(self, llm: StatelessLLMInterface):
         """Set the LLM for chat completion."""
         self._llm = llm
-        self.chat = self._chat_function_factory()
+        # self.chat = self._chat_function_factory() # TODO: check duplicate chat handling in 286 line
 
     def set_system(self, system: str):
         """Set the system prompt."""
@@ -184,6 +184,67 @@ class BasicMemoryAgent(AgentInterface):
 
         return "\n".join(message_parts).strip()
 
+    def _format_rag_context(self, rag_context) -> str:
+        """
+        Format RAG context for inclusion in prompt.
+
+        Args:
+            rag_context: RAGContext object with retrieved documents
+
+        Returns:
+            Formatted string with RAG context
+        """
+        if not rag_context or not rag_context.documents:
+            return ""
+
+        # Check if this is storybook mode (metadata would indicate this)
+        is_storybook = any(
+            doc.metadata and "storybook" in doc.metadata.get("source", "").lower()
+            for doc in rag_context.documents
+        )
+
+        if is_storybook:
+            # Storybook-specific formatting
+            formatted_parts = [
+                "=== Your Story World Knowledge ===",
+                "The following information from your story world helps you understand and respond to the question.",
+                "Use this knowledge to interpret the question through your character's perspective and worldview:",
+                "",
+            ]
+
+            for i, doc in enumerate(rag_context.documents, 1):
+                score_str = f" (relevance: {doc.score:.2f})" if doc.score else ""
+                formatted_parts.append(f"[Story Knowledge {i}{score_str}]")
+                formatted_parts.append(doc.content)
+                formatted_parts.append("")
+
+            formatted_parts.append(
+                "Using your story's values, setting, and experiences above, interpret and answer the user's question "
+                "naturally from your character's perspective. Draw parallels to your world, apply your story's wisdom, "
+                "and respond authentically without breaking character or acknowledging unfamiliarity."
+            )
+            formatted_parts.append("=== End of Story Knowledge ===")
+            formatted_parts.append("")
+
+        else:
+            # General RAG formatting
+            formatted_parts = [
+                "=== Retrieved Context ===",
+                "The following information may help answer the question:",
+                "",
+            ]
+
+            for i, doc in enumerate(rag_context.documents, 1):
+                score_str = f" (relevance: {doc.score:.2f})" if doc.score else ""
+                formatted_parts.append(f"[Document {i}{score_str}]")
+                formatted_parts.append(doc.content)
+                formatted_parts.append("")
+
+            formatted_parts.append("=== End of Context ===")
+            formatted_parts.append("")
+
+        return "\n".join(formatted_parts)
+
     def _to_messages(self, input_data: BatchInput) -> List[Dict[str, Any]]:
         """Prepare messages for LLM API call."""
         messages = self._memory.copy()
@@ -192,11 +253,14 @@ class BasicMemoryAgent(AgentInterface):
         
         # Add RAG context to the prompt if available
         if input_data.rag_context and input_data.rag_context.documents:
-            rag_formatted = input_data.rag_context.to_formatted_string()
+            rag_formatted = self._format_rag_context(input_data.rag_context)
             if rag_formatted:
                 # Prepend RAG context to the user prompt
-                text_prompt = f"{rag_formatted}\n\nUser Question: {text_prompt}"
-                logger.debug(f"Added RAG context with {len(input_data.rag_context.documents)} documents to prompt")
+                text_prompt = f"{rag_formatted}\n\n{text_prompt}"
+                logger.debug(
+                    f"📚 Added RAG context with {len(input_data.rag_context.documents)} "
+                    f"documents (top score: {input_data.rag_context.documents[0].score:.3f})"
+                )
         
         if text_prompt:
             user_content.append({"type": "text", "text": text_prompt})

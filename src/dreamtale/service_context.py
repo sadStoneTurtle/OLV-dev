@@ -13,12 +13,6 @@ from .agent.agents.agent_interface import AgentInterface
 from .translate.translate_interface import TranslateInterface
 from .rag.rag_interface import RAGInterface
 
-from .mcpp.server_registry import ServerRegistry
-from .mcpp.tool_manager import ToolManager
-from .mcpp.mcp_client import MCPClient
-from .mcpp.tool_executor import ToolExecutor
-from .mcpp.tool_adapter import ToolAdapter
-
 from .asr.asr_factory import ASRFactory
 from .tts.tts_factory import TTSFactory
 from .vad.vad_factory import VADFactory
@@ -60,17 +54,8 @@ class ServiceContext:
         # rag_engine can be none if RAG is disabled
         self.rag_engine: RAGInterface | None = None
 
-        self.mcp_server_registery: ServerRegistry | None = None
-        self.tool_adapter: ToolAdapter | None = None
-        self.tool_manager: ToolManager | None = None
-        self.mcp_client: MCPClient | None = None
-        self.tool_executor: ToolExecutor | None = None
-
         # the system prompt is a combination of the persona prompt and live2d expression prompt
         self.system_prompt: str = None
-
-        # Store the generated MCP prompt string (if MCP enabled)
-        self.mcp_prompt: str = ""
 
         self.history_uid: str = ""  # Add history_uid field
 
@@ -93,114 +78,14 @@ class ServiceContext:
             f"    Agent Config: {json.dumps(self.character_config.vad_config.model_dump(), indent=6) if self.character_config.vad_config else 'None'}\n"
             f"  RAG Engine: {type(self.rag_engine).__name__ if self.rag_engine else 'Not Loaded'}\n"
             f"    RAG Config: {json.dumps(self.character_config.rag_config.model_dump(), indent=6) if self.character_config.rag_config else 'None'}\n"
-            f"  System Prompt: {self.system_prompt or 'Not Set'}\n"
-            f"  MCP Enabled: {'Yes' if self.mcp_client else 'No'}"
+            f"  System Prompt: {self.system_prompt or 'Not Set'}"
         )
 
     # ==== Initializers
 
-    async def _init_mcp_components(self, use_mcpp, enabled_servers):
-        """Initializes MCP components based on configuration, dynamically fetching tool info."""
-        logger.debug(
-            f"Initializing MCP components: use_mcpp={use_mcpp}, enabled_servers={enabled_servers}"
-        )
-
-        # Reset MCP components first
-        self.mcp_server_registery = None
-        self.tool_manager = None
-        self.mcp_client = None
-        self.tool_executor = None
-        self.json_detector = None
-        self.mcp_prompt = ""
-
-        if use_mcpp and enabled_servers:
-            # 1. Initialize ServerRegistry
-            self.mcp_server_registery = ServerRegistry()
-            logger.info("ServerRegistry initialized or referenced.")
-
-            # 2. Use ToolAdapter to get the MCP prompt and tools
-            if not self.tool_adapter:
-                logger.error(
-                    "ToolAdapter not initialized before calling _init_mcp_components."
-                )
-                self.mcp_prompt = "[Error: ToolAdapter not initialized]"
-                return  # Exit if ToolAdapter is mandatory and not initialized
-
-            try:
-                (
-                    mcp_prompt_string,
-                    openai_tools,
-                    claude_tools,
-                ) = await self.tool_adapter.get_tools(enabled_servers)
-                # Store the generated prompt string
-                self.mcp_prompt = mcp_prompt_string
-                logger.info(
-                    f"Dynamically generated MCP prompt string (length: {len(self.mcp_prompt)})."
-                )
-                logger.info(
-                    f"Dynamically formatted tools - OpenAI: {len(openai_tools)}, Claude: {len(claude_tools)}."
-                )
-
-                # 3. Initialize ToolManager with the fetched formatted tools
-
-                _, raw_tools_dict = await self.tool_adapter.get_server_and_tool_info(
-                    enabled_servers
-                )
-                self.tool_manager = ToolManager(
-                    formatted_tools_openai=openai_tools,
-                    formatted_tools_claude=claude_tools,
-                    initial_tools_dict=raw_tools_dict,
-                )
-                logger.info("ToolManager initialized with dynamically fetched tools.")
-
-            except Exception as e:
-                logger.error(
-                    f"Failed during dynamic MCP tool construction: {e}", exc_info=True
-                )
-                # Ensure dependent components are not created if construction fails
-                self.tool_manager = None
-                self.mcp_prompt = "[Error constructing MCP tools/prompt]"
-
-            # 4. Initialize MCPClient
-            if self.mcp_server_registery:
-                self.mcp_client = MCPClient(
-                    self.mcp_server_registery, self.send_text, self.client_uid
-                )
-                logger.info("MCPClient initialized for this session.")
-            else:
-                logger.error(
-                    "MCP enabled but ServerRegistry not available. MCPClient not created."
-                )
-                self.mcp_client = None  # Ensure it's None
-
-            # 5. Initialize ToolExecutor
-            if self.mcp_client and self.tool_manager:
-                self.tool_executor = ToolExecutor(self.mcp_client, self.tool_manager)
-                logger.info("ToolExecutor initialized for this session.")
-            else:
-                logger.warning(
-                    "MCPClient or ToolManager not available. ToolExecutor not created."
-                )
-                self.tool_executor = None  # Ensure it's None
-
-            logger.info("StreamJSONDetector initialized for this session.")
-
-        elif use_mcpp and not enabled_servers:
-            logger.warning(
-                "use_mcpp is True, but mcp_enabled_servers list is empty. MCP components not initialized."
-            )
-        else:
-            logger.debug(
-                "MCP components not initialized (use_mcpp is False or no enabled servers)."
-            )
-
     async def close(self):
-        """Clean up resources, especially the MCPClient."""
+        """Clean up resources."""
         logger.info("Closing ServiceContext resources...")
-        if self.mcp_client:
-            logger.info(f"Closing MCPClient for context instance {id(self)}...")
-            await self.mcp_client.aclose()
-            self.mcp_client = None
         if self.agent_engine and hasattr(self.agent_engine, "close"):
             await self.agent_engine.close()  # Ensure agent resources are also closed
         logger.info("ServiceContext closed.")
@@ -216,8 +101,6 @@ class ServiceContext:
         vad_engine: VADInterface,
         agent_engine: AgentInterface,
         translate_engine: TranslateInterface | None,
-        mcp_server_registery: ServerRegistry | None = None,
-        tool_adapter: ToolAdapter | None = None,
         send_text: Callable = None,
         client_uid: str = None,
     ) -> None:
@@ -239,17 +122,8 @@ class ServiceContext:
         self.vad_engine = vad_engine
         self.agent_engine = agent_engine
         self.translate_engine = translate_engine
-        # Load potentially shared components by reference
-        self.mcp_server_registery = mcp_server_registery
-        self.tool_adapter = tool_adapter
         self.send_text = send_text
         self.client_uid = client_uid
-
-        # Initialize session-specific MCP components
-        await self._init_mcp_components(
-            self.character_config.agent_config.agent_settings.basic_memory_agent.use_mcpp,
-            self.character_config.agent_config.agent_settings.basic_memory_agent.mcp_enabled_servers,
-        )
 
         logger.debug(f"Loaded service context with cache: {character_config}")
 
@@ -286,25 +160,6 @@ class ServiceContext:
 
         # init rag from character config
         await self.init_rag(config.character_config.rag_config)
-
-        # Initialize shared ToolAdapter if it doesn't exist yet
-        if (
-            not self.tool_adapter
-            and config.character_config.agent_config.agent_settings.basic_memory_agent.use_mcpp
-        ):
-            if not self.mcp_server_registery:
-                logger.info(
-                    "Initializing shared ServerRegistry within load_from_config."
-                )
-                self.mcp_server_registery = ServerRegistry()
-            logger.info("Initializing shared ToolAdapter within load_from_config.")
-            self.tool_adapter = ToolAdapter(server_registery=self.mcp_server_registery)
-
-        # Initialize MCP Components before initializing Agent
-        await self._init_mcp_components(
-            config.character_config.agent_config.agent_settings.basic_memory_agent.use_mcpp,
-            config.character_config.agent_config.agent_settings.basic_memory_agent.mcp_enabled_servers,
-        )
 
         # init agent from character config
         await self.init_agent(
@@ -398,9 +253,6 @@ class ServiceContext:
                 tts_preprocessor_config=self.character_config.tts_preprocessor_config,
                 character_avatar=avatar,
                 system_config=self.system_config.model_dump(),
-                tool_manager=self.tool_manager,
-                tool_executor=self.tool_executor,
-                mcp_prompt_string=self.mcp_prompt,
             )
 
             logger.debug(f"Agent choice: {agent_config.conversation_agent_choice}")
@@ -460,12 +312,76 @@ class ServiceContext:
                 logger.info(
                     f"✅ RAG engine initialized: {type(self.rag_engine).__name__}"
                 )
+
+                # Auto-load storybook documents if enabled
+                if rag_config.auto_load_storybook:
+                    await self._load_storybook_documents(rag_config)
+
             except Exception as e:
                 logger.error(f"Failed to initialize RAG engine: {e}")
                 self.rag_engine = None
                 raise
         else:
             logger.info("RAG already initialized with the same config.")
+
+    async def _load_storybook_documents(self, rag_config: RAGConfig) -> None:
+        """
+        Load storybook documents into the RAG engine.
+
+        Args:
+            rag_config: RAG configuration containing storybook settings
+        """
+        try:
+            from .rag.document_loader import (
+                load_storybook_documents,
+                get_storybook_path,
+            )
+
+            # Get storybook directory path
+            conf_uid = self.character_config.conf_uid
+            storybook_path = get_storybook_path(
+                rag_config.storybook_directory, conf_uid
+            )
+
+            logger.info(f"📚 Loading storybook documents from: {storybook_path}")
+
+            # Load documents
+            documents, metadatas = await load_storybook_documents(
+                directory=storybook_path,
+                chunk_size=rag_config.chunk_size,
+                chunk_overlap=rag_config.chunk_overlap,
+            )
+
+            if not documents:
+                logger.warning(
+                    f"⚠️  No storybook documents found in {storybook_path}. "
+                    "RAG will be enabled but without storybook content."
+                )
+                return
+
+            # Add documents to RAG engine
+            await self.rag_engine.add_documents(documents, metadatas)
+
+            logger.info(
+                f"✅ Successfully loaded {len(documents)} document chunks "
+                f"for character '{self.character_config.character_name}' "
+                f"(conf_uid: {conf_uid})"
+            )
+
+            # Log storybook info if available
+            if self.character_config.storybook_title:
+                logger.info(
+                    f"📖 Storybook: '{self.character_config.storybook_title}' "
+                    f"(Language: {self.character_config.storybook_language}, "
+                    f"Age: {self.character_config.target_age_range})"
+                )
+
+        except Exception as e:
+            logger.error(f"Failed to load storybook documents: {e}")
+            logger.warning(
+                "Continuing with RAG enabled but without storybook content. "
+                "Character may not have access to story-specific knowledge."
+            )
 
     # ==== utils
 
@@ -499,6 +415,19 @@ class ServiceContext:
                 continue
 
             persona_prompt += prompt_content
+
+        # Add storybook constraint prompt if storybook mode is enabled
+        if self.character_config.storybook_title:
+            try:
+                storybook_constraint = prompt_loader.load_util(
+                    "storybook_constraint_prompt"
+                )
+                persona_prompt += storybook_constraint
+                logger.debug(
+                    f"📖 Added storybook constraint prompt for '{self.character_config.storybook_title}'"
+                )
+            except Exception as e:
+                logger.warning(f"Failed to load storybook constraint prompt: {e}")
 
         logger.debug("\n === System Prompt ===")
         logger.debug(persona_prompt)

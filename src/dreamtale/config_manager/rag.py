@@ -69,6 +69,22 @@ class RAGConfig(I18nMixin, BaseModel):
         default=3,
         description="Maximum number of documents to include in context (None for all)",
     )
+    auto_load_storybook: bool = Field(
+        default=False,
+        description="Automatically load storybook documents from directory on startup",
+    )
+    storybook_directory: str = Field(
+        default="storybooks",
+        description="Directory containing storybook files (relative to project root)",
+    )
+    chunk_size: int = Field(
+        default=300,
+        description="Maximum size of text chunks in words",
+    )
+    chunk_overlap: int = Field(
+        default=50,
+        description="Number of words to overlap between chunks",
+    )
 
     DESCRIPTIONS: ClassVar[Dict[str, Description]] = {
         "enabled": Description(
@@ -90,6 +106,22 @@ class RAGConfig(I18nMixin, BaseModel):
         "max_context_docs": Description(
             en="Maximum documents to include in context",
             zh="上下文中包含的最大文档数",
+        ),
+        "auto_load_storybook": Description(
+            en="Auto-load storybook documents on server startup",
+            zh="服务器启动时自动加载故事书文档",
+        ),
+        "storybook_directory": Description(
+            en="Directory containing storybook files",
+            zh="包含故事书文件的目录",
+        ),
+        "chunk_size": Description(
+            en="Text chunk size in words for document splitting",
+            zh="文档分割的文本块大小（单词数）",
+        ),
+        "chunk_overlap": Description(
+            en="Overlap size between chunks in words",
+            zh="块之间的重叠大小（单词数）",
         ),
     }
 

@@ -7,7 +7,7 @@ RAG 사용 예제
 import asyncio
 from loguru import logger
 
-from .simple_rag import SimpleRAG
+from .naive_rag import NaiveRAG
 
 
 async def example_basic_usage():
@@ -15,7 +15,7 @@ async def example_basic_usage():
     logger.info("=== 기본 RAG 사용 예제 ===")
 
     # RAG 엔진 초기화
-    rag = SimpleRAG(
+    rag = NaiveRAG(
         model_name="sentence-transformers/all-MiniLM-L6-v2", device="cpu"
     )
 
@@ -55,7 +55,7 @@ async def example_with_metadata():
     """메타데이터를 포함한 예제"""
     logger.info("\n=== 메타데이터 포함 예제 ===")
 
-    rag = SimpleRAG(device="cpu")
+    rag = NaiveRAG(device="cpu")
 
     # 메타데이터와 함께 문서 추가
     documents = [
@@ -114,7 +114,7 @@ async def example_incremental_addition():
     """점진적 문서 추가 예제"""
     logger.info("\n=== 점진적 문서 추가 예제 ===")
 
-    rag = SimpleRAG(device="cpu")
+    rag = NaiveRAG(device="cpu")
 
     # 첫 번째 배치
     batch1 = ["문서 1: Python은 프로그래밍 언어입니다.", "문서 2: JavaScript는 웹 언어입니다."]
@@ -135,7 +135,7 @@ async def example_clear_index():
     """인덱스 초기화 예제"""
     logger.info("\n=== 인덱스 초기화 예제 ===")
 
-    rag = SimpleRAG(device="cpu")
+    rag = NaiveRAG(device="cpu")
 
     # 문서 추가
     await rag.add_documents(["문서 1", "문서 2", "문서 3"])

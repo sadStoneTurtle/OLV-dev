@@ -4,7 +4,8 @@ from typing import Dict, Any
 from loguru import logger
 
 from .rag_interface import RAGInterface
-from .simple_rag import NaiveRAG
+from .naive_rag import NaiveRAG
+from .faiss_rag import FaissRAG
 
 
 class RAGFactory:
@@ -27,18 +28,16 @@ class RAGFactory:
         """
         rag_type_lower = rag_type.lower()
 
-        if rag_type_lower == "naive":
-            logger.info("Creating NaiveRAG engine")
+        if rag_type_lower == "simple":
+            logger.info("Creating testRAG engine")
             return NaiveRAG(**kwargs)
+
         # Future implementations can be added here:
-        # elif rag_type_lower == "chroma":
-        #     from .chroma_rag import ChromaRAG
-        #     return ChromaRAG(**kwargs)
-        # elif rag_type_lower == "faiss":
-        #     from .faiss_rag import FaissRAG
-        #     return FaissRAG(**kwargs)
+        elif rag_type_lower == "faiss":
+            logger.info("Creating FaissRAG engine")
+            return FaissRAG(**kwargs)
         else:
             raise ValueError(
-                f"Unsupported RAG type: {rag_type}. Supported types: naive"
+                f"Unsupported RAG type: {rag_type}. Supported types: faiss"
             )
 
