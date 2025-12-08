@@ -28,7 +28,7 @@ class RAGFactory:
         """
         rag_type_lower = rag_type.lower()
 
-        if rag_type_lower == "simple":
+        if rag_type_lower == "naive":
             logger.info("Creating testRAG engine")
             return NaiveRAG(**kwargs)
 

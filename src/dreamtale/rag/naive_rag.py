@@ -19,13 +19,15 @@ class NaiveRAG(RAGInterface):
         self,
         embedding_model_name: str = "sentence-transformers/all-MiniLM-L6-v2",
         device: str = "cpu",
+        **kwargs  # Accept but ignore extra parameters like top_k, min_score
     ):
         """
-        Initialize the SimpleRAG system.
+        Initialize the NaiveRAG system.
 
         Args:
-            model_name: Name of the sentence-transformers model to use
+            embedding_model_name: Name of the sentence-transformers model to use
             device: Device to run the model on ('cpu', 'cuda', 'mps')
+            **kwargs: Additional parameters (ignored for now, for future extensibility)
         """
         self.embedding_model_name = embedding_model_name
         self.device = device
@@ -34,7 +36,7 @@ class NaiveRAG(RAGInterface):
         self.embeddings: Optional[np.ndarray] = None
         self.embedding_model = None
 
-        logger.info(f"Initializing SimpleRAG with model: {embedding_model_name} on {device}")
+        logger.info(f"Initializing NaiveRAG with model: {embedding_model_name} on {device}")
         self._setup_embedding_model()
 
     def _setup_embedding_model(self) -> None:
