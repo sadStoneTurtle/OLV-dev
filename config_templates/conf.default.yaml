@@ -13,12 +13,9 @@ system_config:
     # Enable think_tag_prompt to let LLMs without thinking output show inner thoughts, mental activities and actions (in parentheses format) without voice synthesis. See think_tag_prompt for more details.
     # think_tag_prompt: 'think_tag_prompt'
     # live_prompt: 'live_prompt'
-    # NOTE: In storybook mode we do not use group conversation or tool-calling prompts by default.
+    # NOTE: In storybook mode we do not use group conversation prompts by default.
     # When using group conversation, this prompt will be added to the memory of each AI participant.
     # group_conversation_prompt: 'group_conversation_prompt'
-    # Enable mcp_prompt to let LLMs with MCP (Model Context Protocol) to interact with tools.
-    # Please note that Agent will decide whether to use this prompt or not.
-    # mcp_prompt: 'mcp_prompt'
     # Prompt used when AI is asked to speak proactively
     # proactive_speak_prompt: 'proactive_speak_prompt'
     # Prompt to enhance the LLM's ability to output speakable text
@@ -28,29 +25,60 @@ system_config:
 
 # configuration for the default character
 character_config:
-  conf_name: 'mao_pro' # The name of character configuration file.
-  conf_uid: 'mao_pro_001' # The unique identifier of character configuration.
+  conf_name: 'finn_fox' # The name of character configuration file.
+  conf_uid: 'example_story_001' # The unique identifier of character configuration.
   live2d_model_name: 'mao_pro' # The name of Live2D model. Must be the same as the corresponding name in model_dict.json
-  character_name: 'Mao' # Will be used in the group conversation and the display name of the AI.
+  character_name: 'Finn' # Will be used in the group conversation and the display name of the AI.
   avatar: 'mao.png' # Suggest using a square image for the avatar. Save it in the avatars folder. Leave blank to use the first letter of the character name as the avatar.
-  human_name: 'Human' # Will be used in the group conversation and the display name of the human.
+  human_name: 'Friend' # Will be used in the group conversation and the display name of the human.
   # Optional metadata for storybook mode
-  storybook_title: 'Sample Storybook Title' # Title of the story used with this character
-  storybook_language: 'en' # Language code of the story content, e.g. 'en', 'ko'
-  target_age_range: '4-7' # Target age range for the story
+  storybook_title: 'The Little Fox Adventure in the Whispering Woods'
+  storybook_language: 'en'
+  target_age_range: '4-7'
+
   # ============== Prompts ==============
 
   # Enter the persona prompt you want to use below.
   # If you want to create multiple characters and switch between them,
   #   add characters in characters folder
-  persona_prompt:
-    You are a friendly storybook character who loves reading and explaining stories to children.
-    You always speak in a warm, encouraging, and age-appropriate way.
-    You stay inside the world of the story as much as possible, and avoid scary, violent, or adult topics.
-    When the child is confused, you gently explain the story, the characters' feelings, and the lesson behind the story.
+
+  persona_prompt: |
+    You are Finn the Fox from "The Little Fox's Adventure in the Whispering Woods".
+    You are a curious and brave little fox with bright orange fur and a fluffy tail.
+    You love exploring the Whispering Woods and making new friends.
+    You live in a den near the edge of the forest.
+    
+    Your best friends are:
+    - Bella the Rabbit: playful and energetic
+    - Oliver the Owl: wise and can fly
+    - Daisy the Deer: gentle and strong
+    
+    Together, you saved the Singing Stream and became Heroes of the Whispering Woods.
+    You learned to be patient and that teamwork makes everything possible.
+    
+    You speak with warmth, wonder, and excitement about your forest home.
+    When talking with children, you share lessons from your adventures.
+
+  # =================== RAG (Retrieval-Augmented Generation) ===================
+  rag_config:
+    enabled: true # Enable RAG functionality
+    rag_type: 'naive' # Type of RAG engine: 'simple', 'chroma', 'faiss'
+    include_in_prompt: true # Include retrieved context in the prompt
+    max_context_docs: 3 # Maximum number of documents to include in context (null for all)
+    
+    # Storybook Mode: Automatically load character-specific story content
+    auto_load_storybook: true # Auto-load storybook documents on server startup
+    storybook_directory: 'storybooks' # Directory containing storybook files (relative to project root)
+    chunk_size: 300 # Text chunk size in words for document splitting
+    chunk_overlap: 50 # Number of words to overlap between chunks
+    
+    naive:
+      embedding_model_name: 'sentence-transformers/all-MiniLM-L6-v2' # Embedding model name
+      device: 'cpu' # Device: 'cpu', 'cuda', or 'mps'
+      top_k: 3 # Number of documents to retrieve
+      min_score: 0.3 # Minimum similarity score threshold (0.0 to 1.0)
 
   #  =================== LLM Backend Settings ===================
-
   agent_config:
     conversation_agent_choice: 'basic_memory_agent'
 
@@ -69,11 +97,6 @@ character_config:
         faster_first_response: True
         # Method for segmenting sentences: 'regex' or 'pysbd'
         segment_method: 'pysbd'
-        # Use MCP (Model Context Protocol) Plus to let the LLM have the ability to use tools
-        # 'Plus' means that it has the ability to call tools by using OpenAI API.
-        # In storybook mode, MCP/tool calling is disabled by default.
-        use_mcpp: False
-        # mcp_enabled_servers: ["time", "ddg-search"] # Enabled MCP servers (storybook mode does not use tools by default)
 
       letta_agent:
         host: 'localhost' # Host address
@@ -103,7 +126,7 @@ character_config:
       # Local model served via Ollama (recommended default)
       ollama_llm:
         base_url: 'http://localhost:11434/v1'
-        model: 'llama3.1:8b'
+        model: 'llama3.1:8b'  # llama3.1:8b / exaone3.5
         temperature: 1.0 # value between 0 to 2
         # seconds to keep the model in memory after inactivity. 
         # set to -1 to keep the model in memory forever (even after exiting open llm vtuber)
@@ -455,19 +478,6 @@ character_config:
       required_hits: 3 # Number of consecutive hits required to consider speech
       required_misses: 24 # Number of consecutive misses required to consider silence
       smoothing_window: 5 # Smoothing window size for VAD
-
-  # =================== RAG (Retrieval-Augmented Generation) ===================
-  rag_config:
-    enabled: false # Enable RAG functionality
-    rag_type: 'simple' # Type of RAG engine: 'simple', 'chroma', 'faiss'
-    include_in_prompt: true # Include retrieved context in the prompt
-    max_context_docs: 3 # Maximum number of documents to include in context (null for all)
-    
-    simple:
-      model_name: 'sentence-transformers/all-MiniLM-L6-v2' # Embedding model name
-      device: 'cpu' # Device: 'cpu', 'cuda', or 'mps'
-      top_k: 3 # Number of documents to retrieve
-      min_score: 0.3 # Minimum similarity score threshold (0.0 to 1.0)
 
   tts_preprocessor_config:
     # settings regarding preprocessing for text that goes into TTS
