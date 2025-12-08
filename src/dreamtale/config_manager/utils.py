@@ -140,15 +140,15 @@ def scan_config_alts_directory(config_alts_dir: str) -> list[dict]:
     config_files = []
 
     # Add default config first
-    default_config = read_yaml("conf.yaml")
+    default_config = read_yaml("config_templates/conf.default.yaml")
     config_files.append(
         {
-            "filename": "conf.yaml",
+            "filename": "conf.default.yaml",
             "name": default_config.get("character_config", {}).get(
-                "conf_name", "conf.yaml"
+                "conf_name", "conf.default.yaml"
             )
             if default_config
-            else "conf.yaml",
+            else "conf.default.yaml",
         }
     )
 

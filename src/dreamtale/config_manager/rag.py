@@ -6,10 +6,10 @@ from typing import Optional, Dict, ClassVar
 from .i18n import I18nMixin, Description
 
 
-class SimpleRAGConfig(I18nMixin, BaseModel):
-    """Configuration for SimpleRAG (in-memory sentence-transformers based)"""
+class NaiveRAGConfig(I18nMixin, BaseModel):
+    """Configuration for NaiveRAG (in-memory sentence-transformers based)"""
 
-    model_name: str = Field(
+    embedding_model_name: str = Field(
         default="sentence-transformers/all-MiniLM-L6-v2",
         description="Name of the sentence-transformers model to use for embeddings",
     )
@@ -27,7 +27,7 @@ class SimpleRAGConfig(I18nMixin, BaseModel):
     )
 
     DESCRIPTIONS: ClassVar[Dict[str, Description]] = {
-        "model_name": Description(
+        "embedding_model_name": Description(
             en="Sentence-transformers model for embeddings",
             zh="用于嵌入的句子转换器模型",
         ),
@@ -54,12 +54,12 @@ class RAGConfig(I18nMixin, BaseModel):
         description="Enable or disable RAG functionality",
     )
     rag_type: str = Field(
-        default="simple",
-        description="Type of RAG engine to use (simple, chroma, faiss, etc.)",
+        default="naive",
+        description="Type of RAG engine to use (naive, chroma, faiss, etc.)",
     )
-    simple: SimpleRAGConfig = Field(
-        default_factory=SimpleRAGConfig,
-        description="Configuration for SimpleRAG engine",
+    naive: NaiveRAGConfig = Field(
+        default_factory=NaiveRAGConfig,
+        description="Configuration for NaiveRAG engine",
     )
     include_in_prompt: bool = Field(
         default=True,
