@@ -17,6 +17,7 @@ from .types import WebSocketSend
 from .tts_manager import TTSTaskManager
 from ..chat_history_manager import store_message
 from ..service_context import ServiceContext
+from ..rag.rag_interface import RAGContext
 
 # Import necessary types from agent outputs
 from ..agent.output_types import SentenceOutput, AudioOutput
@@ -63,7 +64,6 @@ async def process_single_conversation(
         rag_context = None
         if context.rag_engine and context.character_config.rag_config.enabled:
             try:
-                logger.info(f"🔍 Performing RAG retrieval for query: '{input_text[:50]}...'")
                 rag_config = context.character_config.rag_config
                 
                 # Get retrieval parameters
@@ -78,14 +78,12 @@ async def process_single_conversation(
                 )
                 
                 if documents:
-                    from ..rag.rag_interface import RAGContext
                     rag_context = RAGContext(
                         documents=documents,
                         query=input_text,
                         metadata={"retrieval_time": "now"}  # Can add timestamp if needed
                     )
-                    logger.info(f"✅ Retrieved {len(documents)} relevant documents")
-                    
+
                     # Send RAG status to frontend
                     await websocket_send(
                         json.dumps({
@@ -100,7 +98,7 @@ async def process_single_conversation(
                 logger.error(f"Error during RAG retrieval: {e}")
                 # Continue without RAG context if retrieval fails
 
-        # Create batch input with RAG context
+        # Create batch input
         batch_input = create_batch_input(
             input_text=input_text,
             images=images,

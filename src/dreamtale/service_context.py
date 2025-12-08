@@ -450,9 +450,9 @@ class ServiceContext:
         try:
             new_character_config_data = None
 
-            if config_file_name == "conf.yaml":
+            if config_file_name == "conf.default.yaml":
                 # Load base config
-                new_character_config_data = read_yaml("conf.yaml").get(
+                new_character_config_data = read_yaml("config_templates/conf.default.yaml").get(
                     "character_config"
                 )
             else:
